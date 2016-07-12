@@ -1,18 +1,11 @@
-# Social Login App
-![Alt text](jwt.png "Title")
-### Node Passport
-- Developed node js project for authentication user by social media using passportjs
-- Node Project have Many social media authentication integration
-- Twitter
-- LinkedIn
-- Facebook
-- Tumblr
-- Yahoo
-- For integration this all functionalities we use app secret and app id for each social media provider  
-- This all integration authenticate user by their account after successfully authenticate user it's return require parameter like access token, user name, unique_id and many other which node project store it in database in mongodb
+# Node-Passport Social Auth
 
-### Python Script
+## OVERVIEW
+
+### Node-Passport Auth is a project for authenticating all the social media providers from only one server which will be used by Gluu server for authenticating users to all social networks.
 
 
-- Python script request node project to authenticate user
-- After complition of python script we integrate it with gluu server 
+## GOALS
+
+- To create Node-Passport server which will provide social network authentication APIs for Gluu server.
+- To create Gluu server interception scripts for authentication of users which will consume Node-Passport server api.
