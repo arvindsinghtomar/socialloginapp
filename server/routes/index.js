@@ -13,8 +13,34 @@ var passportWindowsLive=require('../auth/windowslive');
 var passportDropbox =require('../auth/dropbox');
 var config = require('../_config');
 
+var validateToken = function(req, res, next){
+  var token = req.body.token || req.params.token || req.headers['x-access-token'];
+  if (token) {
+    // verifies secret and checks expiration of token
+    jwt.verify(token, config.applicationSecretKey, function(err, decoded) {      
+      if (err) {
+        return res.json({ success: false, message: 'Failed to authenticate token.' });    
+      } else {
+        // if everything is good, save to request for use in other routes
+        req.decoded = decoded;    
+        next();
+      }
+    });
+
+  } else {
+
+    // if there is no token
+    // return an error
+    return res.status(403).send({ 
+        success: false, 
+        message: 'No token provided.' 
+    });
+    
+  }
+}
+
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Node-Passport' });
 });
 router.get('/login', function(req, res, next) {
   res.send('Go back and register!');
@@ -38,129 +64,21 @@ router.get('/auth/github/callback',
     res.json(req.user);
   });
 
-router.post('/api/auth/twitter',function(req, res) {
-          
-          passport.use(new TwitterStrategy({
-                    consumerKey: req.body.appid,
-                    consumerSecret: req.body.appsecret,
-                    callbackURL: req.body.callbackurl
-                  },
-                  function(accessToken, refreshToken, profile, done) {
-                    console.log("here");
-                    var searchQuery = {
-                      name: profile.displayName
-                    };
-
-                    var updates = {
-                      name: profile.displayName,
-                      someID: profile.id,
-                      accessToken: accessToken
-                    };
-
-                    var options = {
-                      upsert: true
-                    };
-                    
-
-                    // update the user if s/he exists or add a new user
-                    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
-                      if(err) {
-                        return done(err);
-                      } else {
-                        return done(null, user);
-                      }
-                    });
-                  }
-
-                ));
-          init();
-        
-
-});
-
-//router.get('/auth/twitter/:token', passportTwitter.authenticate('twitter'));
-
-router.post('/auth/twitter/', function(req, res, next){
-  console.log("fun call");
-  //next();
-//console.log("query" + req.query.token);
-//console.log("param" + req.params.token);
-  // check header or url parameters or post parameters for token
-  var token = req.body.token || req.params.token || req.headers['x-access-token'];
-  //req.Origin="https://gluu.local.org";
-  // decode token
-  if (token) {
-
-    // verifies secret and checks exp
-    jwt.verify(token, "GluuNodeServerSocialLogin1234567890", function(err, decoded) {      
-      if (err) {
-        return res.json({ success: false, message: 'Failed to authenticate token.' });    
-      } else {
-        // if everything is good, save to request for use in other routes
-        req.decoded = decoded;    
-        next();
-      }
-    });
-
-  } else {
-
-    // if there is no token
-    // return an error
-    return res.status(403).send({ 
-        success: false, 
-        message: 'No token provided.' 
-    });
-    
-  }
-}, passportTwitter.authenticate('twitter'));
-
 
 router.use('/auth/twitter/callback',passportTwitter.authenticate('twitter'),
   function(req, res) {
-    
 
     var queryUserString = encodeURIComponent(JSON.stringify(req.user));
     console.log(queryUserString);
     //var string = JSON.stringify(req.user);
     var s = decodeURIComponent(queryUserString);
     console.log(s);
-  res.redirect(config.applicationEndpoint + '?user=' + queryUserString);
-  });
+    res.redirect(config.applicationEndpoint + '?user=' + queryUserString);
+  } );
 
-
-router.get('/auth/twitter/:token', function(req, res, next){
-  //console.log(req);
-  //next();
-//console.log("query" + req.query.token);
-//console.log("param" + req.params.token);
-  // check header or url parameters or post parameters for token
-  var token = req.body.token || req.params.token || req.headers['x-access-token'];
-  //req.Origin="https://gluu.local.org";
-  // decode token
-  if (token) {
-
-    // verifies secret and checks exp
-    jwt.verify(token, "GluuNodeServerSocialLogin1234567890", function(err, decoded) {      
-      if (err) {
-        return res.json({ success: false, message: 'Failed to authenticate token.' });    
-      } else {
-        // if everything is good, save to request for use in other routes
-        req.decoded = decoded;    
-        next();
-      }
-    });
-
-  } else {
-
-    // if there is no token
-    // return an error
-    return res.status(403).send({ 
-        success: false, 
-        message: 'No token provided.' 
-    });
-    
-  }
-}, passportTwitter.authenticate('twitter'));
+router.get('/auth/twitter/:token', 
+  validateToken, 
+  passportTwitter.authenticate('twitter'));
 
 
 router.get('/auth/facebook', passportFacebook.authenticate('facebook'));

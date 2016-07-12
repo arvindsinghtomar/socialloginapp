@@ -12,6 +12,7 @@ var mongoose = require('mongoose');
 var expressJwt = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var fs = require('fs');
+var config = require('./_config');
 
 //var RedisStore = require('connect-redis')(express.session);
 //var REDIS_URL = process.env.REDISCLOUD_URL || "redis://localhost";
@@ -64,7 +65,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/token', function(req, res){
-  var token = jwt.sign({"name":"Brijesh"}, "GluuNodeServerSocialLogin1234567890", { expiresIn: 1440 });
+  var token = jwt.sign({"name":"Gluuserver"}, config.applicationSecretKey, { expiresIn: 1440 });
   res.send(200, { "token_": token });
   console.log("request token genreted");
   return;
@@ -120,7 +121,5 @@ var options = {
 };
 
 server.createServer(options,app).listen(8000, "192.168.200.68" , function(){
-  console.log("port http://192.168.200.68:8000");
+  console.log("Server listning on https://192.168.200.68:8000");
 });
-
-
