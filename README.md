@@ -74,5 +74,19 @@ During the installation of Gluu server we can setup node server as well. We can 
 
 ## How does Gluu server specify which passport strategy it wants?
 
-
 There will be single page for the authentication with different buttons which will call different endpoints on Node-Passport server. For example twitter button will call the twitter strategy of Node-Passport server for twitter authentication.
+
+
+## How Node-Passport server will fit in Gluu server?
+
+We can write some commands or script to install Node-Passport server which can be added to Gluu server dpkg so that during installation of gluu server, Node-Passport server will be installed as well. And to start Node-Passport server we can start Node-Passport server with gluu server itself.
+
+
+## How Node-Passport server will be configured?
+
+For configuring the application secret and application Id we can create a UI to take user's credentials of their respective social network application.
+
+
+## What are the requirements for a Node-Passport server?
+
+Requirements for Node-Passport server is just Node js and a package passport. We don't actually need database. But for now I'm using mongodb for storing users that are using Node-Passport server. But we can remove that and we don't need a database then.
