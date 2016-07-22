@@ -89,4 +89,31 @@ For configuring the application secret and application Id we can create a UI to 
 
 ## What are the requirements for a Node-Passport server?
 
-Requirements for Node-Passport server is just Node js and a package passport. We don't actually need database. But for now I'm using mongodb for storing users that are using Node-Passport server. But we can remove that and we don't need a database then.
+Requirements for Node-Passport server is just Node js and project dependencies which can be installed by moving to project directory and executing command (npm install).
+
+
+#Gluu APIs For Configuration of Node-Passport Server
+
+##Client application credentials
+
+This API returns application ID,Secret and return URL (callback URL) of a sso provider.
+
+###Request
+| Method        | URL           |
+| ------------- |:-------------:|
+| POST      | /apiURL |
+
+| Type        | Params           | Param type           |
+| ------------- |:-------------:| ------------- |
+| POST      | provider | string |
+
+Here provider is a string value representing an sso example: twitter, gplus, facebook.
+
+| Example request        |
+| ------------- |
+| { "provider": "twitter"}       |
+
+###Response
+| Status        | Response           |
+| ------------- |:-------------:|
+| 200      | { "consumerKey" : "consumerKey", "consumerSecret": "consumerSecret", "callbackURL": "CallbackURL" } |
