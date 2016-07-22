@@ -46,8 +46,8 @@ var ids = {
   },
   serverURI: "gluu.local.org",
   serverWebPort: 8000,
-  applicationEndpoint: "https://gluu.local.org/oxauth/auth/twitter/twitterpostlogin.htm",
-  applicationStartpoint: "https://gluu.local.org/oxauth/auth/twitter/twitterlogin.htm",
+  applicationEndpoint: "https://gluu.local.org/oxauth/auth/generic/genericpostlogin.htm",
+  applicationStartpoint: "https://gluu.local.org/oxauth/auth/generic/genericlogin.htm",
   applicationSecretKey: "GluuNodeServerSocialLogin1234567890"
 };
 
