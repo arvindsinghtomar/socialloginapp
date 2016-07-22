@@ -1,46 +1,29 @@
 var passport = require('passport');
 var TumblrStrategy = require('passport-tumblr').Strategy;
-
-var User = require('../models/user');
+var consumerDetailsRequester = require('./consumerDetailsRequester');
 var config = require('../_config');
-var init = require('./init');
 
-passport.use(new TumblrStrategy({
-    consumerKey: config.tumblr.consumerKey,
-    consumerSecret: config.tumblr.consumerSecret,
-    callbackURL: config.tumblr.callbackURL
-  },
-  function(accessToken, refreshToken, profile, done) {
+consumerDetailsRequester.credentialsRequester('tumblr', function(err, data){
+	passport.use(new TumblrStrategy({
+	    consumerKey: data.consumerKey,
+	    consumerSecret: data.consumerSecret,
+	    callbackURL: data.callbackURL
+	  },
+	  function(accessToken, refreshToken, profile, done) {
+			var userProfile = {
+	      id: profile.id || accessToken,
+	      name: profile._json.response.user.name,
+	      username: profile.username || profile.id,
+	      email: profile.email || "",
+	      givenName: profile.givenName || "",
+	      familyName: profile.familyName || "",
+	      provider: profile.provider || "tumblr",
+	      accessToken: accessToken
+	    }
+	    return done(null, userProfile);
+	  }
 
-    var searchQuery = {
-      name: profile.displayName
-    };
-
-    var updates = {
-      name: profile.displayName,
-      someID: profile.id,
-      accessToken: accessToken
-    };
-
-    var options = {
-      upsert: true
-    };
-    
-
-    // update the user if s/he exists or add a new user
-    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
-      if(err) {
-        return done(err);
-      } else {
-        return done(null, user);
-      }
-    });
-  }
-
-));
-
-// serialize user into the session
-init();
-
+	));
+});
 
 module.exports = passport;

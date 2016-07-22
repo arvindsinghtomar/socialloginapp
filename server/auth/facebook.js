@@ -1,46 +1,29 @@
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
-
-var User = require('../models/user');
+var consumerDetailsRequester = require('./consumerDetailsRequester');
 var config = require('../_config');
-var init = require('./init');
 
-passport.use(new FacebookStrategy({
-    clientID: config.facebook.clientID,
-    clientSecret: config.facebook.clientSecret,
-    callbackURL: config.facebook.callbackURL
-  },
-  function(accessToken, refreshToken, profile, done) {
-
-    var searchQuery = {
-      name: profile.displayName
-    };
-
-    var updates = {
-      name: profile.displayName,
-      someID: profile.id,
-      accessToken: accessToken
-    };
-
-    var options = {
-      upsert: true
-    };
-    
-
-    // update the user if s/he exists or add a new user
-    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
-      if(err) {
-        return done(err);
-      } else {
-        return done(null, user);
-      }
-    });
-  }
-
-));
-
-// serialize user into the session
-init();
-
-
+consumerDetailsRequester.credentialsRequester('facebook', function(err, data){
+	passport.use(new FacebookStrategy({
+	    clientID: data.consumerKey,
+	    clientSecret: data.consumerSecret,
+	    callbackURL: data.callbackURL,
+	    enableProof: true,
+	    profileFields: ['id', 'name', 'displayName', 'email']
+	  },
+	  function(accessToken, refreshToken, profile, done) {
+			var userProfile = {
+	      id: profile._json.id,
+	      name: profile.displayName,
+	      username: profile.username || profile._json.id,
+	      email: profile._json.email,
+	      givenName: profile._json.first_name,
+	      familyName: profile._json.last_name,
+	      provider: profile.provider,
+	      accessToken: accessToken
+	    }
+	    return done(null, userProfile);
+	  }
+	));
+});
 module.exports = passport;

@@ -8,7 +8,6 @@ var bodyParser = require('body-parser');
 var swig = require('swig');
 var passport = require('passport');
 var session = require('express-session');
-var mongoose = require('mongoose');
 var expressJwt = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var fs = require('fs');
@@ -25,8 +24,6 @@ var sess;
 var app = express();
 
 var server = require('https');
-// *** mongoose *** //
-mongoose.connect('mongodb://localhost/passport-social-auth');
 
 
 // *** view engine *** //
@@ -44,7 +41,7 @@ app.use(function (req, res, next) {
     res.header("Access-Control-Expose-Headers", "Authorization");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     res.header("Access-Control-Request-Methods", "POST, GET, PUT, DELETE, OPTIONS");
-    
+
     next();
 });
 
@@ -60,9 +57,15 @@ app.use(session({
   cookie: { secure: false }
 }));
 
-//app.use(express.session({ store: new RedisStore({'url': REDIS_URL}), secret: '2342342' })); // session secret
 app.use(passport.initialize());
 app.use(passport.session());
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
 
 app.get('/token', function(req, res){
   var token = jwt.sign({"name":"Gluuserver"}, config.applicationSecretKey, { expiresIn: 1440 });
@@ -70,13 +73,6 @@ app.get('/token', function(req, res){
   console.log("request token genreted");
   return;
 });
-/*app.use('/', expressJwt({ secret: "GluuNodeServerSocialLogin1234567890" }));
-app.use('/', function(req, res, next) {
-  var authorization = req.header("authorization");
-  var session = JSON.parse( new Buffer((authorization.split(' ')[1]).split('.')[1], 'base64').toString());
-    res.locals.session = session;
-    next();
-});*/
 
 // *** main routes *** //
 app.use('/', routes);
@@ -120,6 +116,6 @@ var options = {
   cert: fs.readFileSync('server.crt')
 };
 
-server.createServer(options,app).listen(8000, "192.168.200.68" , function(){
-  console.log("Server listning on https://192.168.200.68:8000");
+server.createServer(options,app).listen(config.serverWebPort, config.serverURI , function(){
+  console.log("Server listning on https://"+config.serverURI+":"+config.serverWebPort);
 });
