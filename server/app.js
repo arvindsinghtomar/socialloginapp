@@ -11,7 +11,7 @@ var session = require('express-session');
 var expressJwt = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var fs = require('fs');
-var configureStrategies = require('./auth/configureStrategies');
+var getConsumerDetails = require('./auth/getConsumerDetails');
 var config = require('./_config');
 
 //var RedisStore = require('connect-redis')(express.session);
@@ -78,10 +78,9 @@ app.get('/token', function(req, res) {
     }, config.applicationSecretKey, {
         expiresIn: 1440
     });
-    res.send(200, {
+    return res.send(200, {
         "token_": token
     });
-    return;
 });
 
 // *** main routes *** //
@@ -102,7 +101,8 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
     app.use(function(err, req, res, next) {
-        res.redirect('/login');
+        console.log("Err: ", err);
+        //res.redirect('/login');
     })
 };
 
@@ -121,9 +121,11 @@ var options = {
 process.on('uncaughtException', function(err) {
     console.error(err);
 });
+global.serverAddress = config.serverURI;
+global.serverPort = config.serverWebPort;
 
-var listner = server.createServer(options, app).listen(config.serverWebPort, config.serverURI, configureStrategies.setConfiguratins(),function() {
+var listner = server.createServer(options, app).listen(config.serverWebPort, config.serverURI, /*configureStrategies.setConfiguratins()*/ getConsumerDetails.getATT(function(err, data) {
     global.serverAddress = listner.address().address;
     global.serverPort = listner.address().port;
     console.log("Server listning on https://" + listner.address().address + ":" + listner.address().port);
-});
+}));
